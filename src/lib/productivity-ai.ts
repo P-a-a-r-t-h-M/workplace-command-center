@@ -1,5 +1,8 @@
 export type EmailInput = {
   recipient: string;
+  context: string;
+  situation: string;
+  objective: string;
   purpose: string;
   keyPoints: string;
   action: string;
@@ -43,7 +46,7 @@ export function generateEmail(input: EmailInput, variant = 0): EmailDraft {
   };
 }
 
-export function transformEmail(draft: EmailDraft, mode: "improve" | "shorter" | "persuasive"): EmailDraft {
+export function transformEmail(draft: EmailDraft, mode: "improve" | "shorter" | "persuasive" | "expand" | "professional"): EmailDraft {
   if (mode === "shorter") {
     const paragraphs = draft.body.split("\n\n");
     return { ...draft, body: paragraphs.filter((_, index) => index !== 1 || paragraphs.length < 5).slice(0, 5).join("\n\n") };
@@ -53,6 +56,12 @@ export function transformEmail(draft: EmailDraft, mode: "improve" | "shorter" | 
       subject: `Action requested: ${draft.subject.replace(/^Regarding: |^Next steps: /, "")}`,
       body: draft.body.replace("Could you please", "To keep momentum, could you please").replace("Best,", "I’m confident this will move us forward.\n\nBest,"),
     };
+  }
+  if (mode === "expand") {
+    return { ...draft, body: draft.body.replace("Could you please", `To make the next step clear and keep everyone aligned, could you please`) };
+  }
+  if (mode === "professional") {
+    return { subject: draft.subject.replace(/^Regarding:/, "Next steps:"), body: draft.body.replace("Hi ", "Hello ").replace("Thanks so much", "Thank you") };
   }
   return {
     subject: draft.subject.replace("Regarding:", "Next steps for"),
@@ -69,7 +78,7 @@ export type PlannerTask = {
   urgency: "Low" | "Medium" | "High";
 };
 
-export type ScheduleItem = PlannerTask & { start: string; end: string; priority: "Critical" | "High" | "Standard" };
+export type ScheduleItem = PlannerTask & { start: string; end: string; priority: "Critical" | "High" | "Medium" | "Low" };
 
 export function planTasks(tasks: PlannerTask[]): ScheduleItem[] {
   const rank = { Low: 1, Medium: 2, High: 3 };
@@ -91,7 +100,7 @@ export function planTasks(tasks: PlannerTask[]): ScheduleItem[] {
       ...task,
       start: format(startMinute),
       end: format(minute),
-      priority: task.importance === "High" && task.urgency === "High" ? "Critical" : task.importance === "High" || task.urgency === "High" ? "High" : "Standard",
+      priority: task.importance === "High" && task.urgency === "High" ? "Critical" : task.importance === "High" || task.urgency === "High" ? "High" : task.importance === "Medium" || task.urgency === "Medium" ? "Medium" : "Low",
     };
   });
 }
