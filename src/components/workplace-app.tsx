@@ -1,7 +1,7 @@
 "use client";
 
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
-import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
+import { Message, MessageAction, MessageActions, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Badge } from "@/components/ui/badge";
@@ -11,15 +11,17 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Toaster } from "@/components/ui/sonner";
-import { answerWorkplacePrompt, generateEmail, planTasks, transformEmail, type EmailDraft, type EmailInput, type PlannerTask, type ScheduleItem } from "@/lib/productivity-ai";
+import { generateEmail, planTasks, transformEmail, type EmailDraft, type EmailInput, type PlannerTask, type ScheduleItem } from "@/lib/productivity-ai";
 import { cn } from "@/lib/utils";
-import { Bell, Bot, CalendarDays, Check, ChevronRight, CircleUserRound, ClipboardCheck, Clock3, Copy, FilePenLine, Gauge, Inbox, LayoutDashboard, Menu, MessageSquareText, PanelLeftClose, PanelLeftOpen, Plus, RefreshCw, RotateCcw, Save, Send, Settings, Sparkle, Target, Timer, Trash2, Wand2, X } from "lucide-react";
+import heroLandscape from "@/assets/dayflow-pastel-landscape.jpg";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport, type UIMessage } from "ai";
+import { Bell, Bot, CalendarDays, Check, ChevronRight, CircleUserRound, ClipboardCheck, Clock3, Copy, FilePenLine, Gauge, Inbox, LayoutDashboard, ListChecks, Mail, Menu, MessageSquareText, PanelLeftClose, PanelLeftOpen, Pencil, Plus, RefreshCw, RotateCcw, Save, Search, Send, Settings, Sparkle, Target, Timer, Trash2, Wand2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 type View = "dashboard" | "email" | "planner" | "assistant" | "settings";
 type Activity = { id: string; title: string; detail: string; time: string; icon: "email" | "task" | "chat" };
-type ChatMessage = { id: string; role: "user" | "assistant"; content: string };
 
 const navItems = [
   { id: "dashboard" as const, label: "Dashboard", icon: LayoutDashboard },
@@ -35,7 +37,7 @@ const defaultTasks: PlannerTask[] = [
   { id: "3", title: "Respond to partner feedback", deadline: "2026-09-25", duration: 30, importance: "Medium", urgency: "Medium" },
 ];
 
-const initialMessages: ChatMessage[] = [{ id: "welcome", role: "assistant", content: "Hi Alex — I’m ready to help you write, plan, summarize, or make a clear workplace decision. What are you working through?" }];
+const initialMessages: UIMessage[] = [{ id: "welcome", role: "assistant", parts: [{ type: "text", text: "Hi Paarth — I’m ready to help you write, plan, summarize, or make a clear workplace decision. What are you working through?" }] }];
 
 const starterActivity: Activity[] = [
   { id: "a1", title: "Daily plan organized", detail: "3 focus blocks created", time: "9:04 AM", icon: "task" },
@@ -93,10 +95,10 @@ export function WorkplaceApp() {
         </div>
       </aside>
       <div className={cn("transition-[padding] duration-300", collapsed ? "lg:pl-[88px]" : "lg:pl-[252px]")}>
-        <header className="sticky top-0 z-30 flex h-20 items-center border-b border-border/70 bg-background/80 px-4 backdrop-blur-xl sm:px-7 lg:px-10">
+        <header className="sticky top-0 z-30 flex h-20 items-center border-b border-border/70 bg-background/85 px-4 backdrop-blur-xl sm:px-7 lg:px-10">
           <Button variant="ghost" size="icon" className="mr-3 lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu /></Button>
           <div className="min-w-0"><h1 className="truncate font-display text-xl font-bold sm:text-2xl">{navItems.find((item) => item.id === view)?.label}</h1><p className="hidden text-xs text-muted-foreground sm:block">{date}</p></div>
-          <div className="ml-auto flex items-center gap-2 sm:gap-4"><Button variant="ghost" size="icon" className="relative" aria-label="Notifications"><Bell /><span className="absolute right-2 top-2 size-2 rounded-full border-2 border-background bg-notification" /></Button><div className="hidden h-8 w-px bg-border sm:block" /><div className="hidden items-center gap-2 sm:flex"><CircleUserRound className="text-muted-foreground" /><span className="text-sm font-medium">Alex</span></div></div>
+          <div className="ml-auto flex items-center gap-2 sm:gap-3"><div className="header-search hidden lg:flex"><Search /><input aria-label="Search workspace" placeholder="Search your workspace" /></div><div className="hidden items-center gap-2 rounded-full bg-muted px-3 py-2 text-xs font-semibold text-muted-foreground md:flex"><CalendarDays className="size-4 text-primary" />{date}</div><Button variant="ghost" size="icon" className="relative" aria-label="Notifications"><Bell /><span className="absolute right-2 top-2 size-2 rounded-full border-2 border-background bg-notification" /></Button><div className="hidden h-8 w-px bg-border sm:block" /><div className="hidden items-center gap-2 sm:flex"><CircleUserRound className="text-primary" /><span className="text-sm font-semibold">Paarth</span></div></div>
         </header>
         <main className="mx-auto max-w-[1600px] p-4 sm:p-7 lg:p-10">
           {view === "dashboard" && <Dashboard onGo={go} activities={activities} emailCount={emailCount} sessionCount={sessionCount} />}
