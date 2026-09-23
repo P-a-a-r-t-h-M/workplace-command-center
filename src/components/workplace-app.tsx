@@ -91,7 +91,7 @@ export function WorkplaceApp() {
         </nav>
         <div className="mt-auto p-4">
           {!collapsed && <div className="rounded-lg border border-sidebar-border bg-sidebar-panel p-4"><div className="mb-2 flex items-center gap-2 text-xs font-semibold text-sidebar-foreground"><Sparkle className="text-sidebar-active" /> Daily momentum</div><div className="h-1.5 overflow-hidden rounded-full bg-sidebar-accent"><div className="h-full w-[72%] rounded-full bg-sidebar-active" /></div><p className="mt-2 text-xs leading-5 text-sidebar-muted">You’ve completed 72% of today’s focus plan.</p></div>}
-          <div className={cn("mt-4 flex items-center gap-3 border-t border-sidebar-border pt-4", collapsed && "justify-center")}><div className="flex size-9 items-center justify-center rounded-full bg-avatar text-sm font-bold text-avatar-foreground">AM</div>{!collapsed && <div className="min-w-0"><p className="truncate text-sm font-semibold text-sidebar-foreground">Alex Morgan</p><p className="truncate text-xs text-sidebar-muted">Product Lead</p></div>}</div>
+          <div className={cn("mt-4 flex items-center gap-3 border-t border-sidebar-border pt-4", collapsed && "justify-center")}><div className="flex size-9 items-center justify-center rounded-full bg-avatar text-sm font-bold text-avatar-foreground">PM</div>{!collapsed && <div className="min-w-0"><p className="truncate text-sm font-semibold text-sidebar-foreground">Paarth Maisuria</p><p className="truncate text-xs text-sidebar-muted">Product Lead</p></div>}</div>
         </div>
       </aside>
       <div className={cn("transition-[padding] duration-300", collapsed ? "lg:pl-[88px]" : "lg:pl-[252px]")}>
@@ -114,28 +114,45 @@ export function WorkplaceApp() {
 }
 
 function Dashboard({ onGo, activities, emailCount, sessionCount }: { onGo: (v: View) => void; activities: Activity[]; emailCount: number; sessionCount: number }) {
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const [greeting, setGreeting] = useState("Good evening");
+  useEffect(() => { const hour = new Date().getHours(); setGreeting(hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening"); }, []);
   const metrics = [
     { label: "Tasks planned", value: "14", change: "+3 this week", icon: ClipboardCheck, tone: "turquoise" },
     { label: "Emails created", value: String(emailCount), change: "+2 this week", icon: Send, tone: "lime" },
     { label: "Focus time", value: "6.5h", change: "82% of goal", icon: Timer, tone: "mint" },
-    { label: "AI sessions", value: String(sessionCount), change: "+18% vs last week", icon: Bot, tone: "charcoal" },
+    { label: "AI sessions", value: String(sessionCount), change: "+18% vs last week", icon: Bot, tone: "violet" },
   ];
   const actions = [
-    { title: "Generate Email", body: "Create a clear, polished message in seconds.", icon: FilePenLine, view: "email" as const, tone: "turquoise" },
-    { title: "Plan My Day", body: "Turn priorities into a realistic schedule.", icon: CalendarDays, view: "planner" as const, tone: "lime" },
-    { title: "Ask AI", body: "Think through any workplace challenge.", icon: MessageSquareText, view: "assistant" as const, tone: "mint" },
+    { title: "Generate Email", body: "Create a clear, polished message in seconds.", icon: FilePenLine, view: "email" as const, tone: "purple-pink" },
+    { title: "Plan My Day", body: "Turn priorities into a realistic schedule.", icon: CalendarDays, view: "planner" as const, tone: "cyan-sky" },
+    { title: "Ask AI", body: "Think through any workplace challenge.", icon: MessageSquareText, view: "assistant" as const, tone: "mint-green" },
   ];
-  return <div className="animate-enter space-y-8">
-    <section className="welcome-panel overflow-hidden rounded-lg p-6 sm:p-8"><div className="relative z-10 max-w-2xl"><Badge className="mb-5 border-0 bg-badge-soft text-badge-soft-foreground">Wednesday · 3 priorities left</Badge><h2 className="font-display text-3xl font-bold leading-tight sm:text-4xl">{greeting}, Alex.</h2><p className="mt-3 max-w-xl text-sm leading-6 text-hero-muted sm:text-base">Your day is in good shape. Protect your morning focus block, then use the afternoon to close two open loops.</p><Button className="mt-6 h-11 rounded-lg bg-action text-action-foreground shadow-none hover:bg-action/90" onClick={() => onGo("planner")}>Review today’s plan <ChevronRight /></Button></div><div className="focus-orbit" aria-hidden="true"><div /><div /><span>72%</span></div></section>
+  const commandActions = [
+    ["Write an Email", Mail, "email"], ["Plan My Day", CalendarDays, "planner"], ["Summarize Notes", ListChecks, "assistant"],
+    ["Prioritize Tasks", Target, "assistant"], ["Prepare a Meeting", CalendarDays, "assistant"], ["Rewrite Professionally", Pencil, "assistant"],
+  ] as const;
+  return <div className="animate-enter space-y-9">
+    <section className="welcome-panel overflow-hidden rounded-3xl p-6 sm:p-9"><img src={heroLandscape} width={1600} height={700} alt="" aria-hidden="true" className="welcome-art" /><div className="relative z-10 max-w-xl"><Badge className="mb-5 border-0 bg-badge-soft text-badge-soft-foreground">Wednesday · 3 priorities left</Badge><h2 className="font-display text-3xl font-bold leading-tight sm:text-5xl">{greeting}, Paarth <span aria-hidden="true">👋</span></h2><p className="mt-3 max-w-lg text-base leading-7 text-hero-muted">Let’s turn your workload into a clear plan.</p><Button className="mt-7 h-11 rounded-xl" onClick={() => onGo("planner")}>Review today’s plan <ChevronRight /></Button></div></section>
     <section><div className="mb-4 flex items-end justify-between"><div><p className="eyebrow">Today at a glance</p><h2 className="section-title">Productivity overview</h2></div><p className="hidden text-sm text-muted-foreground sm:block">Updated moments ago</p></div><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{metrics.map((metric) => <div className="glass-card metric-card" key={metric.label}><div className={cn("metric-icon", `metric-${metric.tone}`)}><metric.icon /></div><div className="mt-6 flex items-end justify-between gap-3"><div><p className="text-sm text-muted-foreground">{metric.label}</p><p className="mt-1 font-display text-3xl font-bold">{metric.value}</p></div><span className="mb-1 text-xs font-semibold text-positive">{metric.change}</span></div></div>)}</div></section>
-    <div className="grid gap-6 xl:grid-cols-[1.45fr_1fr]">
-      <section><div className="mb-4"><p className="eyebrow">Start something</p><h2 className="section-title">Quick actions</h2></div><div className="grid gap-4 md:grid-cols-3">{actions.map((action) => <button key={action.title} onClick={() => onGo(action.view)} className="action-card group text-left"><div className={cn("action-icon", `metric-${action.tone}`)}><action.icon /></div><h3 className="mt-5 font-display text-lg font-bold">{action.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{action.body}</p><span className="mt-5 inline-flex items-center gap-1 text-xs font-bold text-primary">Open tool <ChevronRight className="size-3 transition-transform group-hover:translate-x-1" /></span></button>)}</div></section>
-      <section><div className="mb-4 flex items-end justify-between"><div><p className="eyebrow">Your work</p><h2 className="section-title">Recent activity</h2></div><Button variant="ghost" size="sm">View all</Button></div><div className="glass-card divide-y divide-border/70 p-2">{activities.slice(0, 4).map((activity) => { const Icon = activity.icon === "email" ? Inbox : activity.icon === "task" ? Check : Bot; return <div key={activity.id} className="flex items-center gap-3 p-3"><div className="activity-icon"><Icon /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{activity.title}</p><p className="truncate text-xs text-muted-foreground">{activity.detail}</p></div><span className="text-[11px] text-muted-foreground">{activity.time}</span></div>; })}</div></section>
+    <section><div className="mb-4"><p className="eyebrow">Start something</p><h2 className="section-title">Quick actions</h2></div><div className="grid gap-4 md:grid-cols-3">{actions.map((action) => <button key={action.title} onClick={() => onGo(action.view)} className={cn("action-card group text-left", `action-${action.tone}`)}><div className="action-icon"><action.icon /></div><h3 className="mt-5 font-display text-lg font-bold">{action.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{action.body}</p><span className="mt-5 inline-flex items-center gap-1 text-xs font-bold text-primary">Open tool <ChevronRight className="size-3 transition-transform group-hover:translate-x-1" /></span></button>)}</div></section>
+    <div className="dashboard-grid">
+      <div className="space-y-6">
+        <DashboardPanel title="Today’s Focus" eyebrow="Protect your attention"><div className="focus-list"><div><span className="priority-dot priority-critical"/><p><strong>Q4 strategy deck</strong><small>90 min · due today</small></p></div><div><span className="priority-dot priority-high"/><p><strong>Campaign review</strong><small>45 min · tomorrow</small></p></div><Button variant="outline" className="w-full" onClick={() => onGo("planner")}>Open focus plan</Button></div></DashboardPanel>
+        <DashboardPanel title="Upcoming Deadlines" eyebrow="Keep momentum"><div className="deadline-list"><p><span>Today</span><strong>Q4 strategy deck</strong></p><p><span>Thu</span><strong>Campaign review</strong></p><p><span>Fri</span><strong>Partner feedback</strong></p></div></DashboardPanel>
+      </div>
+      <div className="space-y-6">
+        <section className="command-card"><div className="command-heading"><div className="command-icon"><Bot /></div><div><p className="eyebrow">Your all-in-one AI workplace</p><h2 className="panel-title">AI Command Center</h2></div></div><button className="command-input" onClick={() => onGo("assistant")}><span><strong>What do you need to accomplish?</strong><small>Prepare tomorrow’s meeting, organise priorities, or draft a difficult email…</small></span><Send /></button><div className="command-actions">{commandActions.map(([label, Icon, destination]) => <Button key={label} variant="outline" onClick={() => onGo(destination)}><Icon />{label}</Button>)}</div></section>
+        <DashboardPanel title="Recent Activity" eyebrow="Your work"><div className="divide-y divide-border/70">{activities.slice(0, 4).map((activity) => { const Icon = activity.icon === "email" ? Inbox : activity.icon === "task" ? Check : Bot; return <div key={activity.id} className="flex items-center gap-3 py-3"><div className="activity-icon"><Icon /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{activity.title}</p><p className="truncate text-xs text-muted-foreground">{activity.detail}</p></div><span className="text-[11px] text-muted-foreground">{activity.time}</span></div>; })}</div></DashboardPanel>
+      </div>
+      <div className="space-y-6">
+        <DashboardPanel title="Task Planner" eyebrow="Today"><div className="mini-progress"><div><span>72%</span><small>Day planned</small></div><div className="progress-track"><span /></div><p>3 priority blocks · 2h 45m protected</p><Button onClick={() => onGo("planner")} className="w-full">Replan my day</Button></div></DashboardPanel>
+        <DashboardPanel title="Today’s Schedule" eyebrow="Next up"><div className="mini-schedule"><p><time>09:00</time><span><strong>Strategy deck</strong><small>Focus block</small></span></p><p><time>10:30</time><span><strong>Reset break</strong><small>15 minutes</small></span></p><p><time>10:45</time><span><strong>Campaign review</strong><small>45 minutes</small></span></p></div></DashboardPanel>
+      </div>
     </div>
   </div>;
 }
+
+function DashboardPanel({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) { return <section className="glass-card dashboard-panel"><p className="eyebrow">{eyebrow}</p><h2 className="panel-title mt-1 mb-5">{title}</h2>{children}</section>; }
 
 function EmailStudio({ onGenerated }: { onGenerated: () => void }) {
   const [input, setInput] = useStoredState<EmailInput>("dayflow-email-input", { recipient: "Jordan Lee, Head of Operations", purpose: "Confirm the timeline for the Q4 launch", keyPoints: "Design handoff is complete\nLegal review is still pending\nThe team needs three business days for QA", action: "confirm whether Friday, October 2 remains achievable", deadline: "2026-09-25", tone: "Friendly" });
