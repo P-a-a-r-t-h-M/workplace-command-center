@@ -17,7 +17,7 @@ import heroLandscape from "@/assets/dayflow-pastel-landscape.jpg";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { Bell, Bot, CalendarDays, Check, ChevronRight, CircleUserRound, ClipboardCheck, Clock3, Copy, FilePenLine, Gauge, Inbox, LayoutDashboard, ListChecks, Mail, Menu, MessageSquareText, PanelLeftClose, PanelLeftOpen, Pencil, Plus, RefreshCw, RotateCcw, Save, Search, Send, Settings, Sparkle, Target, Timer, Trash2, Wand2, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 type View = "dashboard" | "email" | "planner" | "assistant" | "settings";
@@ -177,7 +177,7 @@ function TaskPlanner({ onPlanned }: { onPlanned: (count: number) => void }) {
   const [schedule, setSchedule] = useStoredState<ScheduleItem[]>("dayflow-schedule", planTasks(tasks));
   const [mode, setMode] = useState<"daily" | "weekly">("daily");
   const [newTask, setNewTask] = useState<Omit<PlannerTask, "id">>({ title: "", deadline: "", duration: 45, importance: "Medium", urgency: "Medium" });
-  const addTask = () => { if (!newTask.title.trim()) return toast.error("Add a task name first"); const task = { ...newTask, id: crypto.randomUUID() }; setTasks([...tasks, task]); setNewTask({ ...newTask, title: "" }); toast.success("Task added"); };
+  const addTask = () => { if (!newTask.title.trim()) { toast.error("Add a task name first"); return; } const task = { ...newTask, id: crypto.randomUUID() }; setTasks([...tasks, task]); setNewTask({ ...newTask, title: "" }); toast.success("Task added"); };
   const replan = () => { setSchedule(planTasks(tasks)); onPlanned(tasks.length); toast.success("Your day has been replanned"); };
   const total = schedule.reduce((sum, task) => sum + task.duration, 0);
   return <div className="animate-enter"><div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><PageIntro eyebrow="Protect your attention" title="AI Task Planner" description="Balance urgency, impact, and effort into a schedule you can actually finish." /><div className="segmented"><button className={mode === "daily" ? "active" : ""} onClick={() => setMode("daily")}>Daily</button><button className={mode === "weekly" ? "active" : ""} onClick={() => setMode("weekly")}>Weekly</button></div></div>
