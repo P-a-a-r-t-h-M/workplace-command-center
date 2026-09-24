@@ -39,10 +39,12 @@ export function generateEmail(input: EmailInput, variant = 0): EmailDraft {
   const pointSection = keyPoints.length
     ? `\n\nThe key points are:\n${keyPoints.map((point) => `• ${point}`).join("\n")}`
     : "";
+  const contextSection = [input.context.trim(), input.situation.trim()].filter(Boolean).join(". ");
+  const objective = input.objective.trim() || purpose;
   const name = recipient.includes(" ") ? recipient.split(" ")[0] : recipient;
   return {
     subject: `${variant % 2 ? "Next steps" : "Regarding"}: ${purpose}`,
-    body: `Hi ${name},\n\n${openings[input.tone][variant % 2]} I’d like to discuss ${purpose}.${pointSection}\n\nCould you please ${action}${deadline}? ${close[input.tone]}\n\nBest,\nAlex`,
+    body: `Hi ${name},\n\n${openings[input.tone][variant % 2]} I’d like to discuss ${purpose}.${contextSection ? ` ${contextSection}.` : ""}${pointSection}\n\nOur objective is to ${objective.charAt(0).toLowerCase()}${objective.slice(1)}. Could you please ${action}${deadline}? ${close[input.tone]}\n\nBest,\nPaarth`,
   };
 }
 
